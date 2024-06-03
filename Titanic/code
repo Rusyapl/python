@@ -1,0 +1,43 @@
+from sre_constants import error
+import numpy as np
+import pandas as pd
+import seaborn as sns
+
+train = pd.read_csv("/kaggle/input/titanic-extended/train.csv")
+train_copy = train.copy()
+
+columns_to_delete = ['PassengerId', 'Survived', 'Name', 'Ticket', 'Fare', 'Cabin', 'Embarked']
+for col in columns_to_delete:
+    try:
+        train_copy = train_copy.drop(col, axis=1)
+    except KeyError:
+        print(f"Column '{col}' not found.")
+
+average_age = train_copy['Age'].mean()
+rows_count = train_copy.shape[0]
+
+print ("Средний возраст:", average_age, '\nКоличество строк:',rows_count)
+
+train_copy['Age'].replace(np.nan, average_age, inplace=True)
+train['Age'].replace(np.nan, average_age, inplace=True)
+
+#sns.catplot(x="Survived", y="Age", data=train, kind = "strip")
+#от 0 до 36 больше всего выживших
+#sns.countplot(x='Survived', hue='Pclass', data=train)
+#Выжило: 1 класс %60, 2 класс примерно 50%, 3 класс 25%
+#sns.catplot(x="Survived", hue="Sex", data=train, kind = "bar")
+#73% выживших женщины
+#sns.catplot(x="Survived", hue="SibSp", data=train, kind = "bar")
+#больше всего выжило от 1 до 3
+#sns.catplot(x="Survived", hue="Parch", data=train, kind = "bar")
+#больше всего выжило от 1 до 3
+
+simple_prediction = (~((train['Sex'] == 'male') & (train['Pclass'] == 3) | (train['SibSp'] > 3) | (train['Parch'] > 3) | (train['Age'] > 36))).astype(int).values
+
+def make_prediction_file(prediction, test_data, name):
+
+    result = pd.DataFrame({'PassengerId': test_data.reset_index()['PassengerId'], "Survived":prediction})
+    result = result[result['Survived'] == 1]
+    result.to_csv(name, index = False)
+
+make_prediction_file(simple_prediction, train, '/kaggle/working/titanic.csv')
