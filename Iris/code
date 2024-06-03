@@ -1,0 +1,81 @@
+import numpy as np 
+import pandas as pd 
+import matplotlib.pyplot as plt
+import os
+from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn import tree
+
+for dirname, _, filenames in os.walk('/kaggle/input'):
+    for filename in filenames:
+        print(os.path.join(dirname, filename))
+
+iris = pd.read_csv("/kaggle/input/iris/Iris.csv")
+iris = iris.drop(columns = "Id")
+#iris.plot(x = "Species", y = ["SepalLengthCm", "SepalWidthCm", 'PetalLengthCm', "PetalWidthCm"])
+
+#scatterplot
+'''colors = ["red", "green", "blue"]
+species = ["Iris-virginica", "Iris-versicolor", "Iris-setosa"]
+for i in range(3):
+    x = iris[iris["Species"] == species[i]]
+    plt.scatter(x["SepalLengthCm"], x["SepalWidthCm"], c = colors[i], label = species[i])
+plt.xlabel("SepalLength")
+plt.ylabel("SepalWidth")
+plt.legend()'''
+
+'''colors = ["red", "green", "blue"]
+species = ["Iris-virginica", "Iris-versicolor", "Iris-setosa"]
+for i in range(3):
+    x = iris[iris["Species"] == species[i]]
+    plt.scatter(x["PetalWidthCm"], x["PetalLengthCm"], c = colors[i], label = species[i])
+plt.xlabel("PetalWidth")
+plt.ylabel("PetalLength")
+plt.legend()'''
+
+'''colors = ["red", "green", "blue"]
+species = ["Iris-virginica", "Iris-versicolor", "Iris-setosa"]
+for i in range(3):
+    x = iris[iris["Species"] == species[i]]
+    plt.scatter(x["SepalLengthCm"], x["PetalLengthCm"], c = colors[i], label = species[i])
+plt.xlabel("SepalLength")
+plt.ylabel("PetalLength")
+plt.legend()'''
+
+'''colors = ["red", "green", "blue"]
+species = ["Iris-virginica", "Iris-versicolor", "Iris-setosa"]
+for i in range(3):
+    x = iris[iris["Species"] == species[i]]
+    plt.scatter(x["SepalWidthCm"], x["PetalWidthCm"], c = colors[i], label = species[i])
+plt.xlabel("SepalWidth")
+plt.ylabel("PetalWidth")
+plt.legend()'''
+
+numeric_columns = iris.select_dtypes(include=['float64', 'int64'])
+corr = numeric_columns.corr().round(3)
+corr.style.background_gradient(cmap='coolwarm')
+
+le = LabelEncoder()
+iris["Species"] = le.fit_transform(iris["Species"])
+
+X = iris.drop(columns = 'Species')
+Y = iris['Species']
+
+x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size = 0.33)
+
+model = LogisticRegression()
+model.fit(x_train, y_train)
+print("Точность регрессии: ", model.score(x_test, y_test) * 100)
+
+model2 = KNeighborsClassifier()
+model2.fit(x_train, y_train)
+print("Точность соседа: ", model2.score(x_test, y_test) * 100)
+
+model3 = DecisionTreeClassifier()
+model3.fit(x_train, y_train)
+print("Точность древа: ", model3.score(x_test, y_test) * 100)
+
+tree.plot_tree(model3)
